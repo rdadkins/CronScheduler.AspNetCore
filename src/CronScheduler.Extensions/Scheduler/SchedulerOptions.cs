@@ -22,6 +22,16 @@ namespace CronScheduler.Extensions.Scheduler
         public bool RunImmediately { get; set; } = false;
 
         /// <summary>
+        /// The maximum amount of times to retry the Job if an exception is thrown during execution.
+        /// </summary>
+        public int MaxRetries { get; set; } = 0;
+
+        /// <summary>
+        /// The interval to wait before attempting to retry the Job if an exception is thrown during execution.
+        /// </summary>
+        public TimeSpan RetryInterval { get; set; } = TimeSpan.Zero;
+
+        /// <summary>
         /// The name of the job that this options is associated with.
         /// </summary>
         internal string JobName { get; set; } = string.Empty;

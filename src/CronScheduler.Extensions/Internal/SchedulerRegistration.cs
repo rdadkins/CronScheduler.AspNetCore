@@ -127,7 +127,7 @@ namespace CronScheduler.Extensions.Internal
 
             var nextRunTime = options.RunImmediately ? currentTimeUtc : crontabSchedule.GetNextOccurrence(currentTimeUtc, timeZone) !.Value;
 
-            return new SchedulerTaskWrapper(crontabSchedule, job, nextRunTime, timeZone);
+            return new SchedulerTaskWrapper(crontabSchedule, job, nextRunTime, timeZone, options.MaxRetries, options.RetryInterval);
         }
     }
 }

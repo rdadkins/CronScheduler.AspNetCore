@@ -53,22 +53,46 @@ namespace CronScheduler.Extensions.Internal
                 await _taskFactory.StartNew(
                     async () =>
                     {
-                        try
+                        var maxRetries = taskThatShouldRun.MaxRetries;
+                        var exceptionThrown = false;
+                        do
                         {
-                            await taskThatShouldRun.ScheduledJob.ExecuteAsync(stoppingToken);
-                        }
-                        catch (Exception ex)
-                        {
-                            var args = new UnobservedTaskExceptionEventArgs(
-                                ex as AggregateException ?? new AggregateException(ex));
-
-                            UnobservedTaskException?.Invoke(this, args);
-
-                            if (!args.Observed)
+                            try
                             {
-                                throw;
+                                await taskThatShouldRun.ScheduledJob.ExecuteAsync(stoppingToken);
+                            }
+                            catch (Exception ex)
+                            {
+                                exceptionThrown = true;
+
+                                var args = new UnobservedTaskExceptionEventArgs(
+                                    ex as AggregateException ?? new AggregateException(ex));
+
+                                UnobservedTaskException?.Invoke(this, args);
+
+                                if (!args.Observed)
+                                {
+                                    throw;
+                                }
+                            }
+
+                            if (!exceptionThrown || --maxRetries <= 0)
+                            {
+                                break;
+                            }
+
+                            var retryInterval = taskThatShouldRun.RetryInterval;
+                            var nextRunTime = taskThatShouldRun.NextRunTime;
+                            if (retryInterval > TimeSpan.Zero && nextRunTime.Subtract(DateTimeOffset.UtcNow) > retryInterval)
+                            {
+                                Thread.Sleep(taskThatShouldRun.RetryInterval);
+                            }
+                            else
+                            {
+                                break;
                             }
                         }
+                        while (true);
                     },
                     stoppingToken);
 #pragma warning restore CA2008 // Do not create tasks without passing a TaskScheduler

@@ -15,16 +15,22 @@ namespace CronScheduler.Extensions.Internal
         /// <param name="scheduledJob"></param>
         /// <param name="nextRunTime"></param>
         /// <param name="timeZoneInfo"></param>
+        /// <param name="maxRetries"></param>
+        /// <param name="retryInterval"></param>
         public SchedulerTaskWrapper(
             CronExpression cronExpression,
             IScheduledJob scheduledJob,
             DateTimeOffset nextRunTime,
-            TimeZoneInfo timeZoneInfo)
+            TimeZoneInfo timeZoneInfo,
+            int maxRetries,
+            TimeSpan retryInterval)
         {
             Schedule = cronExpression;
             ScheduledJob = scheduledJob;
             NextRunTime = nextRunTime;
             TimeZoneInfo = timeZoneInfo;
+            MaxRetries = maxRetries;
+            RetryInterval = retryInterval;
         }
 
         public CronExpression Schedule { get; set; }
@@ -36,6 +42,10 @@ namespace CronScheduler.Extensions.Internal
         public DateTimeOffset NextRunTime { get; set; }
 
         public TimeZoneInfo TimeZoneInfo { get; set; }
+
+        public int MaxRetries { get; set; }
+
+        public TimeSpan RetryInterval { get; set; }
 
         public void Increment()
         {
